@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.22)
+
+add_library(synaptix_board STATIC
+    board.c
+)
+
+target_include_directories(synaptix_board PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(synaptix_board PUBLIC
+    stm32cubemx
+    utils
+    synaptix_bsp
+    logger
+)

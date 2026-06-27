@@ -1,0 +1,9 @@
+[submodule "libs/tinyusb"]
+	path = libs/tinyusb
+	url = https://github.com/hathach/tinyusb.git
+[submodule "libs/stm32-mw-lwip"]
+	path = libs/stm32-mw-lwip
+	url = https://github.com/STMicroelectronics/stm32-mw-lwip.git
+[submodule "libs/logger"]
+	path = libs/logger
+	url = https://github.com/SynaptiXCompany/logger.git
