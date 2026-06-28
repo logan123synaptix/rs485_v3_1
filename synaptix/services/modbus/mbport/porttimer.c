@@ -33,14 +33,14 @@ BOOL xMBPortTimersInit(eModbus_t modbus, USHORT usTim1Timerout50us)
 
 inline void vMBPortTimersEnable(eModbus_t modbus)
 {
-    if (modbus->config.ucPort == BSP_RS485_COM_PORT) {
+    if (modbus->config.ucPort == BSP_RS485) {
         bsp_timer_start(BSP_TIMER1);
     }
 }
 
 inline void vMBPortTimersDisable(eModbus_t modbus)
 {
-    if (modbus->config.ucPort == BSP_RS485_COM_PORT) {
+    if (modbus->config.ucPort == BSP_RS485) {
         bsp_timer_stop(BSP_TIMER1);
     }
 }
