@@ -12,8 +12,8 @@
  */
 
 #include "rf_app.h"
-#include "bsp_uart.h"
-#include "bsp_gpio.h"
+#include "board.h"
+#include "bsp_board_gpio.h"
 #include "indicator.h"
 #include "logger.h"
 

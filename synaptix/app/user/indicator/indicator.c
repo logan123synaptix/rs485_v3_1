@@ -1,5 +1,5 @@
 #include "indicator.h"
-#include "board.h"
+#include "bsp_board_gpio.h"
 #include "string.h"
 
 void led_on(int led_num)
