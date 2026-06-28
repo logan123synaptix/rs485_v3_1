@@ -20,7 +20,7 @@ target_include_directories(synaptix_app PUBLIC
 target_link_libraries(synaptix_app PUBLIC
     synaptix_bsp
     synaptix_modbus
-    synaptix_board
     services
     utils
+    logger
 )
