@@ -10,7 +10,7 @@
 #include "mb.h"
 #include "mbport.h"
 #include "port.h"
-#include "bsp_uart.h"
+#include "bsp_board_gpio.h"
 
 extern eModbus modbus[N_MODBUS];
 
@@ -27,21 +27,21 @@ static void mb_timer0_callback(void)
 
 BOOL xMBPortTimersInit(eModbus_t modbus, USHORT usTim1Timerout50us)
 {
-    bsp_timer_set_handle(0, mb_timer0_callback);
+    bsp_timer_set_handle(BSP_TIMER1, mb_timer0_callback)
     return TRUE;
 }
 
 inline void vMBPortTimersEnable(eModbus_t modbus)
 {
     if (modbus->config.ucPort == BSP_RS485_COM_PORT) {
-        bsp_timer0_start();
+        bsp_timer_start(BSP_TIMER1);
     }
 }
 
 inline void vMBPortTimersDisable(eModbus_t modbus)
 {
     if (modbus->config.ucPort == BSP_RS485_COM_PORT) {
-        bsp_timer0_stop();
+        bsp_timer_stop(BSP_TIMER1);
     }
 }
 

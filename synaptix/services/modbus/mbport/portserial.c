@@ -13,8 +13,7 @@
 #include "mbport.h"
 #include "port.h"
 
-#include "bsp_uart.h"
-#include "bsp_gpio.h"
+#include "bsp_board_gpio.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -32,7 +31,7 @@ eModbus modbus[N_MODBUS] = {
 
 static void mb_uart_rx_task(eModbus *mb)
 {
-    int len = bsp_com_available(mb->config.ucPort);
+    int len = bsp_uart_available(BSP_RS485);
     if (len > 0) {
         for (int i = 0; i < len; i++) {
             if (mb->pxMBFrameCBByteReceived != NULL) {
@@ -56,7 +55,7 @@ BOOL xMBPortSerialInit(eModbus_t modbus, UCHAR ucPORT, ULONG ulBaudRate,
                        UCHAR ucDataBits, eMBParity eParity)
 {
     modbus->config.ucPort = ucPORT;
-    bsp_com_set_tx_callback(ucPORT, mb_uart_tx_task, modbus);
+    bsp_com_set_tx_callback(BSP_RS485, mb_uart_tx_task, modbus);
     return TRUE;
 }
 
@@ -76,20 +75,20 @@ void vMBPortSerialEnable(eModbus_t modbus, BOOL xRxEnable, BOOL xTxEnable)
 
 BOOL xMBPortSerialGetByte(eModbus_t modbus, CHAR *pucByte)
 {
-    uint8_t res = bsp_com_read(modbus->config.ucPort, (uint8_t *)pucByte, 1);
+    uint8_t res = bsp_uart_receive(BSP_RS485, (uint8_t *)pucByte, 1, 10);
     return (res == 1) ? TRUE : FALSE;
 }
 
 BOOL xMBPortSerialPutByte(eModbus_t modbus, CHAR ucByte)
 {
     modbus->tx_done = FALSE;
-    bsp_com_write_it(modbus->config.ucPort, (uint8_t *)&ucByte, 1);
+    bsp_uart_transmit(BSP_RS485, (uint8_t *)&ucByte, 1, 100)
     return TRUE;
 }
 
 BOOL xMBPortSerialPutBytes(eModbus_t modbus, volatile UCHAR *ucByte, USHORT usSize)
 {
-    bsp_com_write_it(modbus->config.ucPort, (uint8_t *)ucByte, usSize);
+    bsp_uart_transmit(BSP_RS485, (uint8_t *)&ucByte, 1, 100)
     return TRUE;
 }
 

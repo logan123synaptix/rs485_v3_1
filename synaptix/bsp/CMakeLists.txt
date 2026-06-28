@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 add_library(synaptix_bsp STATIC
-    bsp_callbacks.c
-    bsp_gpio.c
-    bsp_uart.c
+    bsp_board_gpio.c
     bsp_usb.c
 )
 
@@ -13,6 +11,6 @@ target_include_directories(synaptix_bsp PUBLIC
 
 target_link_libraries(synaptix_bsp PUBLIC
     stm32cubemx
-    utils
+    board
     tinyusb
 )

@@ -18,7 +18,7 @@
 
 #include "mb.h"
 #include "port.h"
-#include "bsp_uart.h"
+#include "bsp_board_gpio.h"
 #include "user_mb_app.h"
 
 #include "FreeRTOS.h"
@@ -55,12 +55,12 @@ void modbus_task(void *arg)
 
 void modbus_service_init(void)
 {
-    bsp_com_init();
+    bsp_uart_init(BSP_RS485);
 
     eMBInit(&modbus[0],
             MB_RTU,
             MODBUS_SLAVE_ADDRESS,
-            BSP_RS485_COM_PORT,
+            BSP_RS485,
             MODBUS_BAUD_RATE,
             MB_PAR_NONE);
 
