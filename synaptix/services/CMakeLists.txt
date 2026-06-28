@@ -25,6 +25,7 @@ target_include_directories(${CMAKE_LIBS_NAME} PUBLIC
     shell
     web_service
     ${CMAKE_CURRENT_SOURCE_DIR}/modbus
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../mongoose
 )
 
 target_link_libraries(${CMAKE_LIBS_NAME} PRIVATE
