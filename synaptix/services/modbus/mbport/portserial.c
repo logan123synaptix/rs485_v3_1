@@ -82,13 +82,13 @@ BOOL xMBPortSerialGetByte(eModbus_t modbus, CHAR *pucByte)
 BOOL xMBPortSerialPutByte(eModbus_t modbus, CHAR ucByte)
 {
     modbus->tx_done = FALSE;
-    bsp_uart_transmit(BSP_RS485, (uint8_t *)&ucByte, 1, 100)
+    bsp_uart_transmit(BSP_RS485, (uint8_t *)&ucByte, 1, 100);
     return TRUE;
 }
 
 BOOL xMBPortSerialPutBytes(eModbus_t modbus, volatile UCHAR *ucByte, USHORT usSize)
 {
-    bsp_uart_transmit(BSP_RS485, (uint8_t *)&ucByte, 1, 100)
+    bsp_uart_transmit(BSP_RS485, (uint8_t *)&ucByte, 1, 100);
     return TRUE;
 }
 

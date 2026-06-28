@@ -27,7 +27,7 @@ static void mb_timer0_callback(void)
 
 BOOL xMBPortTimersInit(eModbus_t modbus, USHORT usTim1Timerout50us)
 {
-    bsp_timer_set_handle(BSP_TIMER1, mb_timer0_callback)
+    bsp_timer_set_handle(BSP_TIMER1, mb_timer0_callback);
     return TRUE;
 }
 
