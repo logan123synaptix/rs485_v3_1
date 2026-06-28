@@ -87,19 +87,19 @@ static void zigbee_reset_cb(ZigbeeMesh_t *zb, uint8_t isSuccess, void *arg)
 
 static uint32_t rf_get_available(void)
 {
-    return bsp_com_available(BSP_RF_COM_PORT);
+    return bsp_uart_available(BSP_ZIGBEE);
 }
 
 static void rf_write(uint8_t *buff, uint32_t len)
 {
     LOGD(TAG_Driver, "RF Write : %u", len);
     log_print_hex(LOGGER_DEBUG, TAG_Driver, buff, (uint16_t)len);
-    bsp_com_write(BSP_RF_COM_PORT, buff, len);
+    bsp_uart_transmit(BSP_ZIGBEE, buff, len, 100);
 }
 
 static void rf_read(uint8_t *buff, uint32_t len)
 {
-    uint32_t length = bsp_com_read(BSP_RF_COM_PORT, buff, len);
+    uint32_t length = bsp_uart_receive(BSP_ZIGBEE, buff, len, 10);
     if (length > 0) {
         LOGD(TAG_Driver, "RF Read : %u", length);
         log_print_hex(LOGGER_INFO, TAG_Driver, buff, (uint16_t)length);

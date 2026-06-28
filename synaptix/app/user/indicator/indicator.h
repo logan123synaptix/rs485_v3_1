@@ -28,6 +28,8 @@ typedef struct Indicator
 
 } Indicator_t;
 
+void indicator_init(Indicator_t *ind);
+
 void indicator_poll(Indicator_t *ind, uint32_t timestamp);
 
 static inline void indicator_set_net_status(Indicator_t *ind, uint8_t status){
