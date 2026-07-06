@@ -28,9 +28,11 @@ void app_init(void){
     app_logger_init();
 
     /*another initialize*/
+
+    app_task_handle = osThreadNew(app_task, NULL, &app_task_attr);
 }
 
 void app_task(void *arg){
     (void)arg;
-    log_info(TAG, "APP TASK IS CREATING");
+    LOGI(TAG, "APP TASK IS CREATING");
 }
