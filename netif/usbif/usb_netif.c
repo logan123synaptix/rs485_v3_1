@@ -68,6 +68,7 @@ try changing the first byte of tud_network_mac_address[] below from 0x02 to 0x00
   #include "lwip/apps/lwiperf.h"
 #endif
 #include <stm32h523xx.h>
+#include "app_config.h"
 static const char *TAG = "usb-netif";
 #define INIT_IP4(a, b, c, d) \
   { PP_HTONL(LWIP_MAKEU32(a, b, c, d)) }
@@ -91,25 +92,25 @@ static struct netif netif_data;
 /* this is used by this code, ./class/net/net_driver.c, and usb_descriptors.c */
 /* ideally speaking, this should be generated from the hardware's unique ID (if available) */
 /* it is suggested that the first byte is 0x02 to indicate a link-local address */
-uint8_t tud_network_mac_address[6] = {0x02, 0x02, 0x84, 0x6A, 0x96, 0x00};
+uint8_t tud_network_mac_address[6] = {MAC_ADDR_BYTE1, MAC_ADDR_BYTE2, MAC_ADDR_BYTE3, MAC_ADDR_BYTE4, MAC_ADDR_BYTE5, MAC_ADDR_BYTE6};
 
 /* network parameters of this MCU */
-static const ip4_addr_t ipaddr = INIT_IP4(192, 168, 4, 1);
-static const ip4_addr_t netmask = INIT_IP4(255, 255, 255, 0);
-static const ip4_addr_t gateway = INIT_IP4(0, 0, 0, 0);
+static const ip4_addr_t ipaddr =  INIT_IP4(IP4_BYTE1, IP4_BYTE2, IP4_BYTE3, IP4_BYTE4);
+static const ip4_addr_t netmask = INIT_IP4(IP4_GW_BYTE1, IP4_GW_BYTE2, IP4_GW_BYTE3, IP4_GW_BYTE4);
+static const ip4_addr_t gateway = INIT_IP4(IP4_GW_BYTE1, IP4_GW_BYTE2, IP4_GW_BYTE3, IP4_GW_BYTE4);
 
 /* database IP addresses that can be offered to the host; this must be in RAM to store assigned MAC addresses */
 static dhcp_entry_t entries[] = {
     /* mac ip address               lease time */
-    {{0}, INIT_IP4(192, 168, 4, 2), 24 * 60 * 60},
-    {{0}, INIT_IP4(192, 168, 4, 3), 24 * 60 * 60},
-    {{0}, INIT_IP4(192, 168, 4, 4), 24 * 60 * 60},
+    {{0}, INIT_IP4(IP4_BYTE1, IP4_BYTE2, IP4_BYTE3, IP4_BYTE4+1), ENTRY_TIMEOUT},
+    {{0}, INIT_IP4(IP4_BYTE1, IP4_BYTE2, IP4_BYTE3, IP4_BYTE4+2), ENTRY_TIMEOUT},
+    {{0}, INIT_IP4(IP4_BYTE1, IP4_BYTE2, IP4_BYTE3, IP4_BYTE4+3), ENTRY_TIMEOUT},
 };
 
 static const dhcp_config_t dhcp_config = {
-    .router = INIT_IP4(0, 0, 0, 0),  /* router address (if any) */
-    .port = 67,                      /* listen port */
-    .dns = INIT_IP4(192, 168, 7, 1), /* dns server (if any) */
+    .router = INIT_IP4(IP4_ROUTER_BYTE1, IP4_ROUTER_BYTE2, IP4_ROUTER_BYTE3, IP4_ROUTER_BYTE4),  /* router address (if any) */
+    .port = LISTEN_PORT,                      /* listen port */
+    .dns = INIT_IP4(IP4_DNS_BYTE1, IP4_DNS_BYTE2, IP4_DNS_BYTE3, IP4_DNS_BYTE4), /* dns server (if any) */
     "usb",                           /* dns suffix */
     TU_ARRAY_SIZE(entries),          /* num entry */
     entries                          /* entries */
@@ -180,7 +181,7 @@ void ip_status_callback(struct netif *netif){
     LOGD(TAG, "GW : %s", ipaddr_ntoa(&netif->gw));
   }
   else{
-    LOGD(TAG,"Netif is down");
+    LOGD(TAG, "Netif is down");
   }
 }
 static void init_lwip(void) {
@@ -318,12 +319,14 @@ void usb_netif_init(){
 void tud_mount_cb(void) {
   blink_interval_ms = BLINK_MOUNTED;
   netif_set_link_up(&netif_data);
+  LOGI(TAG, "USB mounted (enumeration complete)!!!");
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void) {
   blink_interval_ms = BLINK_NOT_MOUNTED;
   netif_set_link_down(&netif_data);
+  LOGI(TAG, "USB unmounted (enumeration lost)!!!");
 }
 
 // Invoked when usb bus is suspended

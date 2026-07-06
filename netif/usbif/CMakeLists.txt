@@ -13,4 +13,5 @@ target_include_directories(usb_net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(usb_net PUBLIC 
     libs
     stm32cubemx
+    synaptix_app
 )
