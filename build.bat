@@ -3,20 +3,30 @@ setlocal
 
 set TOOLCHAIN=cmake/gcc-arm-none-eabi.cmake
 set JOBS=8
+set PROJECT_NAME=RF_IO_V3
+set ELF=build\release\%PROJECT_NAME%.elf
+set HEX=build\release\%PROJECT_NAME%.hex
 
 if "%1"=="build" goto build
 if "%1"=="debug" goto debug
 if "%1"=="clean" goto clean
+if "%1"=="flash" goto flash
 
 echo Usage:
 echo   build.bat build   - configure (if needed) + build Release
 echo   build.bat debug   - configure (if needed) + build Debug
 echo   build.bat clean   - clean build directories
+echo   build.bat flash   - configure+build Release, convert to .hex, flash via SWD
 goto end
 
 :build
 if not exist build\release\build.ninja (
     echo Configuring Release...
+    @REM echo  -----    -       -    ---     -
+    @REM echo |           -   -      -  -    -
+    @REM echo  -----        -        -   -   -
+    @REM echo       |       -        -    -  -
+    @REM echo  -----        -        -     ---
     cmake -S . -B build\release -G Ninja ^
         -DCMAKE_TOOLCHAIN_FILE=%TOOLCHAIN% ^
         -DCMAKE_BUILD_TYPE=Release
@@ -43,10 +53,6 @@ echo Cleaning...
 if exist build\release cmake --build build\release --target clean 2>nul
 if exist build\debug   cmake --build build\debug   --target clean 2>nul
 goto end
-
-:error
-echo Configure failed!
-exit /b 1
 
 :flash
 REM One-shot: configure (if needed) + build Release + elf->hex + SWD flash.
@@ -77,6 +83,10 @@ STM32_Programmer_CLI -c port=SWD -w %HEX% -v --start
 if errorlevel 1 goto error
 echo [+] Flash success!
 goto end
+
+:error
+echo Configure failed!
+exit /b 1
 
 :end
 endlocal

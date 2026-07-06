@@ -29,6 +29,7 @@
 #include "task.h"
 #include "usart.h"
 // #include "mongoose_glue.h"
+#include "app.h"
 #include "logger.h"
 #include "tcp_server.h"
 /* USER CODE END Includes */
@@ -122,10 +123,10 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN defaultTask */
-  logger_init(LOGGER_DEBUG,NULL);
   // printf("OS START\r\n");
   tcpip_init(NULL, NULL);
   usb_netif_init();
+  app_init();
   tcp_server_init(&shell_server,8000,"shell_tcp",NULL,NULL);
   // xTaskCreate(web_server_task,"Webserver",4096*2,NULL,10,&web_server_handle);
   /* Infinite loop */
