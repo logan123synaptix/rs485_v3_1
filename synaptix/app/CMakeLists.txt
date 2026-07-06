@@ -21,6 +21,7 @@ target_include_directories(synaptix_app PUBLIC
 
 target_link_libraries(synaptix_app PUBLIC
     synaptix_bsp
+    board
     synaptix_modbus
     services
     utils

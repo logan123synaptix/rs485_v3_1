@@ -5,9 +5,10 @@
 extern "C" {
 #endif
 
+#include "FreeRTOS.h"
+#include "task.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "task.h"
 
 #define BSP_USB_BRIDGE_CH   2   /* CDC interface 2 — USB-RS485 bridge */
 

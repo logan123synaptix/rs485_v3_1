@@ -43,6 +43,9 @@ extern "C" {
 #define IP4_DNS_BYTE3           IP4_GW_BYTE3
 #define IP4_DNS_BYTE4           IP4_GW_BYTE4
 
+/* TASK APP */
+#define APP_TASK_STACK_SIZE     512
+#define APP_TASK_PRIORITY       osPriorityNormal
 
 #ifdef __cplusplus
 }
