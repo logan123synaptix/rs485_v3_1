@@ -48,5 +48,35 @@ goto end
 echo Configure failed!
 exit /b 1
 
+:flash
+REM One-shot: configure (if needed) + build Release + elf->hex + SWD flash.
+REM Always flashes the Release build - Debug is meant for GDB/ST-Link
+REM stepping (-O0/-g), not for what actually goes on the device.
+if not exist build\release\build.ninja (
+    echo Configuring Release...
+    cmake -S . -B build\release -G Ninja ^
+        -DCMAKE_TOOLCHAIN_FILE=%TOOLCHAIN% ^
+        -DCMAKE_BUILD_TYPE=Release
+    if errorlevel 1 goto error
+)
+echo Building Release...
+cmake --build build\release -j%JOBS%
+if errorlevel 1 goto error
+
+if not exist %ELF% (
+    echo [!] %ELF% not found after build, aborting flash.
+    goto error
+)
+
+echo [*] Converting %ELF% to %HEX%...
+arm-none-eabi-objcopy -O ihex %ELF% %HEX%
+if errorlevel 1 goto error
+
+echo [*] Flashing %HEX%...
+STM32_Programmer_CLI -c port=SWD -w %HEX% -v --start
+if errorlevel 1 goto error
+echo [+] Flash success!
+goto end
+
 :end
 endlocal

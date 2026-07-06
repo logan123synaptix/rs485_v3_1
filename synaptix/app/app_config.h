@@ -47,6 +47,10 @@ extern "C" {
 #define APP_TASK_STACK_SIZE     512
 #define APP_TASK_PRIORITY       osPriorityNormal
 
+/* USB CHANNEL  */
+#define BSP_USB_SHELL_CH        1
+#define BSP_USB_BRIDGE_CH       2
+
 #ifdef __cplusplus
 }
 #endif

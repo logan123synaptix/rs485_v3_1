@@ -6,6 +6,7 @@
 #include "task.h"
 
 #include "board.h"
+#include "logger.h"
 
 /*  Config  */
 #define BRIDGE_TASK_STACK_WORDS     512
@@ -17,6 +18,8 @@
 static TaskHandle_t s_bridge_task_handle = NULL;
 static TaskHandle_t s_modbus_task_handle = NULL;
 static volatile bool s_enabled = false;
+
+const char *TAG = "USB-RS485";
 
 /*  Bridge task  */
 
@@ -39,6 +42,7 @@ static void bridge_task(void *arg)
             if (len > 0) {
                 bsp_rs485_de_on();
                 bsp_uart_transmit(BSP_RS485, buf, len, 100);
+                LOGI(TAG, "USB->RS485: %s, len = %d", buf, len);
                 bsp_rs485_de_off();
             }
         }
@@ -50,6 +54,7 @@ static void bridge_task(void *arg)
             uint32_t len = bsp_uart_receive(BSP_RS485, buf, rx_avail, 10);
             if (len > 0 && bsp_usb_connected(BSP_USB_BRIDGE_CH)) {
                 bsp_usb_transmit(BSP_USB_BRIDGE_CH, buf, len);
+                LOGI("RS485->USB: %s, len = %d", buf, len);
             }
         }
 

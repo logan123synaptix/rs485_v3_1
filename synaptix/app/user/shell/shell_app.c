@@ -12,7 +12,7 @@
 #include "cli_shell.h"
 #include "bsp_usb.h"
 #include "board.h"
-
+#include "app_config.h"
 #include "FreeRTOS.h"
 #include "task.h"
 

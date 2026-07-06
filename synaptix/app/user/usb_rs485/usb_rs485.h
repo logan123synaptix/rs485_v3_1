@@ -9,8 +9,7 @@ extern "C" {
 #include "task.h"
 #include <stdbool.h>
 #include <stdint.h>
-
-#define BSP_USB_BRIDGE_CH   2   /* CDC interface 2 — USB-RS485 bridge */
+#include "app_config.h"
 
 void usb_rs485_init(void);
 
