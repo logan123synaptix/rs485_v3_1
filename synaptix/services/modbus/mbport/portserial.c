@@ -22,8 +22,8 @@
 
 eModbus modbus[N_MODBUS] = {
     [0] = {
-        .rs485_de_select   = bsp_rs485_de_on,
-        .rs485_de_deselect = bsp_rs485_de_off,
+        .rs485_de_select   = (BOOL (*)())bsp_rs485_de_on,
+        .rs485_de_deselect = (BOOL (*)())bsp_rs485_de_off,
     },
 };
 

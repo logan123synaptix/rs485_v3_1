@@ -57,12 +57,17 @@ static void bridge_task(void *arg)
     }
 }
 
+void usb_rs485_set_modbus_handle(TaskHandle_t handle)
+{
+    s_modbus_task_handle = handle;
+}
+
 /* Public API  */
 
 void usb_rs485_init(void)
 {
-    /* Get Modbus task handle to suspend/resume it */
-    s_modbus_task_handle = xTaskGetHandle("modbusTask");
+    // /* Get Modbus task handle to suspend/resume it */
+    // s_modbus_task_handle = xTaskGetHandle("modbusTask");
 
     xTaskCreate(bridge_task,
                 "bridgeTask",
@@ -70,6 +75,7 @@ void usb_rs485_init(void)
                 NULL,
                 BRIDGE_TASK_PRIORITY,
                 &s_bridge_task_handle);
+
 }
 
 void usb_rs485_enable(void)
@@ -101,6 +107,6 @@ void usb_rs485_disable(void)
     }
 }
 
-bool usb_rs485_is_enabled(){
+bool usb_rs485_is_enabled(void){
     return s_enabled;
 }

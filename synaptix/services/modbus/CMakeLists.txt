@@ -58,4 +58,5 @@ target_include_directories(synaptix_modbus PRIVATE
 target_link_libraries(synaptix_modbus PUBLIC
     stm32cubemx
     synaptix_bsp
+    synaptix_app
 )

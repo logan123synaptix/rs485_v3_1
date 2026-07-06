@@ -24,6 +24,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "app_freertos.h"
+#include "usb_rs485.h"
 
 /* ── External symbols from portserial.c ──────────────────────────────────── */
 extern eModbus modbus[N_MODBUS];
@@ -66,10 +67,14 @@ void modbus_service_init(void)
 
     eMBEnable(&modbus[0]);
 
-    xTaskCreate(modbus_task,
-                "modbusTask",
-                MODBUS_TASK_STACK_WORDS,
-                NULL,
-                MODBUS_TASK_PRIORITY,
-                NULL);
+    // xTaskCreate(modbus_task,
+    //             "modbusTask",
+    //             MODBUS_TASK_STACK_WORDS,
+    //             NULL,
+    //             MODBUS_TASK_PRIORITY,
+    //             NULL);
+
+    TaskHandle_t modbus_handle;
+    xTaskCreate(modbus_task, "modbusTask", MODBUS_TASK_STACK_WORDS, NULL, MODBUS_TASK_PRIORITY, &modbus_handle);
+    usb_rs485_set_modbus_handle(modbus_handle);
 }
