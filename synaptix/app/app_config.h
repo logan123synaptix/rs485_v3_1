@@ -43,6 +43,7 @@ extern "C" {
 #define IP4_DNS_BYTE3           IP4_GW_BYTE3
 #define IP4_DNS_BYTE4           IP4_GW_BYTE4
 
+
 #ifdef __cplusplus
 }
 #endif
