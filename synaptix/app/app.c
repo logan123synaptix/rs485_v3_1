@@ -51,5 +51,5 @@ void app_task(void *arg){
      * task function must never return (FreeRTOS port calls
      * prvTaskExitError() -> configASSERT fail -> interrupts disabled forever).
      * vTaskDelete(NULL) safely terminates this one-shot task. */
-    // vTaskDelete(NULL);
+    vTaskDelete(NULL);
 }
