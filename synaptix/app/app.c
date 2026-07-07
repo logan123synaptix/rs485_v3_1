@@ -47,4 +47,9 @@ void app_init(void){
 void app_task(void *arg){
     (void)arg;
     LOGI(TAG, "APP TASK IS CREATED");
+    /* TEMP DEBUG FIX - single instrumentation point:
+     * task function must never return (FreeRTOS port calls
+     * prvTaskExitError() -> configASSERT fail -> interrupts disabled forever).
+     * vTaskDelete(NULL) safely terminates this one-shot task. */
+    vTaskDelete(NULL);
 }
