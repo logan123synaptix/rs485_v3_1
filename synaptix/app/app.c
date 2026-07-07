@@ -38,6 +38,10 @@ void app_init(void){
     usb_rs485_init();
 
     app_task_handle = osThreadNew(app_task, NULL, &app_task_attr);
+
+    LOGI(TAG, "app_init: osThreadNew(app_task) returned, handle=%p, hwm=%lu",
+     (void*)app_task_handle,
+     (unsigned long)uxTaskGetStackHighWaterMark(NULL));
 }
 
 void app_task(void *arg){
