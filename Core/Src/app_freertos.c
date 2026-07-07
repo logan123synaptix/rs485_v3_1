@@ -130,9 +130,16 @@ void StartDefaultTask(void *argument)
   tcp_server_init(&shell_server,8000,"shell_tcp",NULL,NULL);
   // xTaskCreate(web_server_task,"Webserver",4096*2,NULL,10,&web_server_handle);
   /* Infinite loop */
-  for(;;)
   {
-    osDelay(1);
+    /* TEMP DEBUG - remove after root cause verification */
+    uint32_t hb = 0;
+    for(;;)
+    {
+      if ((hb++ % 500) == 0) {
+        LOGI("default", "heartbeat=%lu tick=%lu", (unsigned long)hb, (unsigned long)xTaskGetTickCount());
+      }
+      osDelay(1);
+    }
   }
   /* USER CODE END defaultTask */
 }
@@ -157,4 +164,3 @@ PUTCHAR_PROTOTYPE
 //   }
 // }
 /* USER CODE END Application */
-

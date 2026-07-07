@@ -51,8 +51,15 @@ static void shell_receive_task(void *arg)
     LOGI("shell", "shell_receive_task started, tick=%lu", (unsigned long)xTaskGetTickCount());
 
     /* Wait for USB host to connect before printing prompt */
-    while (!bsp_usb_connected(BSP_USB_SHELL_CH)) {
-        vTaskDelay(pdMS_TO_TICKS(100));
+    {
+        /* TEMP DEBUG - remove after root cause verification */
+        uint32_t wait_hb = 0;
+        while (!bsp_usb_connected(BSP_USB_SHELL_CH)) {
+            if ((wait_hb++ % 20) == 0) {
+                LOGI("shell", "waiting usb connected, hb=%lu tick=%lu", (unsigned long)wait_hb, (unsigned long)xTaskGetTickCount());
+            }
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
     }
     cli_shell_boot(&s_shell);
 

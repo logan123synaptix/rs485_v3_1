@@ -317,10 +317,11 @@ void usb_netif_task(void *arg) {
 TaskHandle_t usb_netif_handle = NULL;
 
 void usb_netif_init(){
-  BaseType_t ret = xTaskCreate(usb_netif_task,"usb_netif_process",4096,NULL,10,&usb_netif_handle);
-  /* TEMP DEBUG - remove after root cause verification */
-  LOGI(TAG, "usb_netif_init: xTaskCreate ret=%d, handle=%p, freeHeap=%u",
-       (int)ret, (void*)usb_netif_handle, (unsigned)xPortGetFreeHeapSize());
+  /* NOTE: LOGI() must NOT be called here - usb_netif_init() runs before
+     app_logger_init()/logger_init() in StartDefaultTask(), so logger_mutex
+     is still NULL at this point. Calling LOGI() here causes
+     xSemaphoreTake(NULL, portMAX_DELAY) -> HardFault (confirmed by testing). */
+  xTaskCreate(usb_netif_task,"usb_netif_process",4096,NULL,10,&usb_netif_handle);
 }
 
 // Invoked when device is mounted
