@@ -35,7 +35,7 @@ void app_init(void){
     bsp_init();
     indicator_init(&s_indicator);
     shell_app_init();
-    usb_rs485_init();
+    // usb_rs485_init();
 
     app_task_handle = osThreadNew(app_task, NULL, &app_task_attr);
 }
