@@ -28,6 +28,9 @@ static void bridge_task(void *arg)
     (void)arg;
     uint8_t buf[BRIDGE_BUF_SIZE];
 
+    /* TEMP DEBUG - remove after root cause verification */
+    LOGI(TAG, "bridge_task ENTERED, tick=%lu", (unsigned long)xTaskGetTickCount());
+
     for (;;) {
         /* Block here when disabled */
         if (!s_enabled) {
@@ -74,12 +77,20 @@ void usb_rs485_init(void)
     // /* Get Modbus task handle to suspend/resume it */
     // s_modbus_task_handle = xTaskGetHandle("modbusTask");
 
-    xTaskCreate(bridge_task,
+    /* TEMP DEBUG - remove after root cause verification */
+    LOGI(TAG, "usb_rs485_init: before xTaskCreate, tick=%lu, freeHeap=%u",
+         (unsigned long)xTaskGetTickCount(), (unsigned)xPortGetFreeHeapSize());
+
+    BaseType_t ret = xTaskCreate(bridge_task,
                 "bridgeTask",
                 BRIDGE_TASK_STACK_WORDS,
                 NULL,
                 BRIDGE_TASK_PRIORITY,
                 &s_bridge_task_handle);
+
+    /* TEMP DEBUG - remove after root cause verification */
+    LOGI(TAG, "usb_rs485_init: after xTaskCreate ret=%d, handle=%p, freeHeap=%u",
+         (int)ret, (void*)s_bridge_task_handle, (unsigned)xPortGetFreeHeapSize());
 
 }
 
