@@ -7,7 +7,7 @@
 #include "indicator.h"
 #include "shell_app.h"
 
-const char *TAG = "APP";
+static const char *TAG = "APP";
 
 static osThreadId_t app_task_handle;
 static const osThreadAttr_t app_task_attr = {

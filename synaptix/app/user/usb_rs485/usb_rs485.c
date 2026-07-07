@@ -19,7 +19,7 @@ static TaskHandle_t s_bridge_task_handle = NULL;
 static TaskHandle_t s_modbus_task_handle = NULL;
 static volatile bool s_enabled = false;
 
-const char *TAG = "USB-RS485";
+static const char *TAG = "USB-RS485";
 
 /*  Bridge task  */
 

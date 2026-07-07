@@ -271,6 +271,9 @@ static void led_blinking_task(void) {
 
 
 void usb_netif_task(void *arg) {
+  /* TEMP DEBUG - remove after root cause verification */
+  LOGI(TAG, "usb_netif_task ENTERED, tick=%lu", (unsigned long)xTaskGetTickCount());
+
   /* initialize TinyUSB */
 
   // init device stack on configured roothub port
@@ -278,7 +281,9 @@ void usb_netif_task(void *arg) {
     .role = TUSB_ROLE_DEVICE,
     .speed = TUSB_SPEED_AUTO
   };
+  LOGI(TAG, "before tusb_init, tick=%lu", (unsigned long)xTaskGetTickCount());
   tusb_init(BOARD_TUD_RHPORT, &dev_init);
+  LOGI(TAG, "after tusb_init, tick=%lu", (unsigned long)xTaskGetTickCount());
   while (!tud_ready())
   {
     tud_task();
@@ -312,7 +317,10 @@ void usb_netif_task(void *arg) {
 TaskHandle_t usb_netif_handle = NULL;
 
 void usb_netif_init(){
-  xTaskCreate(usb_netif_task,"usb_netif_process",4096,NULL,10,&usb_netif_handle);
+  BaseType_t ret = xTaskCreate(usb_netif_task,"usb_netif_process",4096,NULL,10,&usb_netif_handle);
+  /* TEMP DEBUG - remove after root cause verification */
+  LOGI(TAG, "usb_netif_init: xTaskCreate ret=%d, handle=%p, freeHeap=%u",
+       (int)ret, (void*)usb_netif_handle, (unsigned)xPortGetFreeHeapSize());
 }
 
 // Invoked when device is mounted
@@ -341,5 +349,3 @@ void tud_suspend_cb(bool remote_wakeup_en) {
 void tud_resume_cb(void) {
   blink_interval_ms = tud_mounted() ? BLINK_MOUNTED : BLINK_NOT_MOUNTED;
 }
-
-

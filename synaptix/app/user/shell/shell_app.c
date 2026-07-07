@@ -15,6 +15,7 @@
 #include "app_config.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "logger.h" /* TEMP DEBUG - remove after root cause verification */
 
 /* ── Internal state ───────────────────────────────────────────────────────── */
 
@@ -45,6 +46,9 @@ static void shell_receive_task(void *arg)
 {
     (void)arg;
     char c;
+
+    /* TEMP DEBUG - remove after root cause verification */
+    LOGI("shell", "shell_receive_task started, tick=%lu", (unsigned long)xTaskGetTickCount());
 
     /* Wait for USB host to connect before printing prompt */
     while (!bsp_usb_connected(BSP_USB_SHELL_CH)) {
