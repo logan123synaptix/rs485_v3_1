@@ -189,3 +189,54 @@ dùng nếu họ đề cập).
 - Việc phụ, chưa ưu tiên trừ khi người dùng chủ động hỏi: đặt tên hiển thị COM port đẹp 
   hơn "USB Serial Device" (cần file .inf custom, yêu cầu ký driver, khá phức tạp cho 
   production).
+
+-- VIỆC ĐANG DỞ: 
+"ok hệ thống hoạt động ok rồi, giờ tôi muốn đến với modbus. Để test modbus thì cần làm những gìTrước khi hướng dẫn test, cần đọc kỹ modbus_service.c để biết chính xác cấu hình (slave address, baud, register map) — không đoán.Ran a command, viewed a fileRan a command, viewed a fileXác nhận cấu hình rõ ràng: RTU, slave address = 1, baud = 115200, 8N1, no parity, chạy trên BSP_RS485 = USART1. Giờ xem user_mb_app.c để biết chính xác register map — Modbus không tự nhiên có dữ liệu, cần biết thanh ghi nào ánh xạ tới cái gì (input/holding/coil...).Find user_mb_app source filesFind user_mb_app source filesCó 3 bản user_mb_app.c — cần xác định bản nào thật sự được build (CMake include đường dẫn nào).Find which user_mb_app.c is actually compiledFind which user_mb_app.c is actually compiledXác nhận bản thật là synaptix/app/user/modbus/user_mb_app.c — đọc file này.View the actual compiled user_mb_app.c to see register mapView the actual compiled user_mb_app.c to see register mapCallback đầy đủ chuẩn (Input Reg, Holding Reg, Coils, Discrete Inputs), nhưng có 1 điểm rất quan trọng cần lưu ý: user_mb_app_poll() để trống hoàn toàn — nghĩa là thanh ghi Modbus không tự động đồng bộ với DI/DO vật lý thật của board. Đọc/ghi Holding Register qua Modbus hiện tại chỉ tương tác với buffer RAM nội bộ (usSRegHoldBuf), không phải trạng thái GPIO thực (bsp_get_input/bsp_output_on). Cần kiểm tra user_mb_app.h để lấy con số chính xác S_REG_HOLDING_START, S_REG_HOLDING_NREGS, v.v.View user_mb_app.h for register address rangesView user_mb_app.h for register address rangesĐủ dữ liệu để hướng dẫn test chính xác, không suy đoán.
+Tóm tắt cấu hình Modbus (đọc trực tiếp từ code)
+Thông sốGiá trịProtocolRTUSlave Address1Baud rate115200Data bits / Parity / Stop8-N-1UART vật lýUSART1 (chân RS485 A/B)
+Vùng thanh ghiFunction CodeĐịa chỉ bắt đầuSố lượngGhi chúDiscrete InputsFC02064Chưa nối với DI thật — chỉ là buffer trốngCoilsFC01/FC05064Chưa nối với DO thật — chỉ là buffer trốngInput RegistersFC040100Chưa có dữ liệu thật, toàn 0Holding RegistersFC03/FC060100Đọc/ghi được, lưu RAM tạm
+
+
+Về việc test khi chưa có converter RS485-USB rời — có 2 hướng thật sự khả thi tối nay:
+Hướng A — Loopback nội bộ qua chính board (khuyên dùng, không cần thêm phần cứng gì)
+Vì Modbus và Bridge cùng dùng UART vật lý (USART1) nhưng qua 2 "cửa" khác nhau — Modbus qua GPIO RS485 A/B trực tiếp, Bridge qua USB CDC — bạn không thể dùng chính USB Bridge của board này làm master để tự test Modbus của chính nó (vì cả hai đi qua cùng 1 UART vật lý, không phải 2 kênh độc lập — bật Bridge sẽ suspend Modbus, đúng theo cơ chế DTR đã làm).
+Vậy hướng A thực chất không dùng được. Bỏ qua.
+Hướng B — Dùng module RS485-TTL rời + USB-TTL rời bạn có sẵn (nếu có bất kỳ Arduino/ESP32/USB-TTL nào ở nhà)
+Nếu bạn có bất kỳ thiết bị nào có UART TTL + module RS485 rời (dù không phải máy chuyên dụng), có thể ráp tạm 1 "Modbus master mini" bằng Arduino chạy thư viện ModbusMaster. Nhưng việc này tốn thời gian ngang với việc mai đi mua/mượn converter.
+Hướng C — Test giới hạn không cần RS485 vật lý: kiểm tra Modbus stack có "sống" hay không qua log/UART debugCheck if modbus service has any logging to verify it's alive without external masterCheck if modbus service has any logging to verify it's alive without external masterKhông có log nào trong Modbus stack hiện tại — nên không có cách "nhìn thấy" Modbus hoạt động qua log debug.
+Thành thật thì: không có cách nào test đúng nghĩa giao thức Modbus RTU tối nay mà không có ít nhất 1 thiết bị RS485 thứ 2 (converter, hoặc bất kỳ Arduino+module RS485 nào). Đây là giới hạn vật lý — Modbus cần 2 đầu trên bus để nói chuyện.
+Việc có ích làm được tối nay (không cần phần cứng thêm): verify code/logic sẵn sàng, để mai có converter là test được ngay, không mất thời gian debug thêm:
+
+Build + nạp firmware, xác nhận không crash khi boot (bridge_status = DISABLED nghĩa là Modbus đang chạy nền).
+Tôi có thể thêm tạm vài dòng log vào modbus_task (ví dụ log mỗi khi eMBPoll chạy, hoặc log khi holding register bị ghi) để bạn thấy task Modbus có sống, không treo — qua LPUART1 debug console bạn đã có sẵn. Đây là log tạm, dễ bỏ sau.
+
+Bạn muốn tôi thêm log tạm này vào modbus_task/user_mb_app.c không (nằm trong synaptix/, tôi có thể sửa trực tiếp)?okViệc này nằm trong synaptix/ nên tôi sửa trực tiếp. Đọc lại 2 file liên quan trước khi sửa.View full modbus_service.c with line numbers before editingView full modbus_service.c with line numbers before editingKiểm tra eMBRegHoldingCB để biết log ghi holding reg đặt ở đâu hợp lý nhất, và xem logger.h cách dùng LOGI.View top of user_mb_app.c, holding callback, and logger macroView top of user_mb_app.c, holding callback, and logger macroĐủ thông tin. Kế hoạch log:
+
+modbus_task: log heartbeat mỗi ~1s (không log mỗi 20ms — spam) để xác nhận task sống, không treo.
+eMBRegHoldingCB: log khi có READ hoặc WRITE thật xảy ra — đây là bằng chứng chắc chắn nhất Modbus master (dù crack hay không) đã giao tiếp thành công với board.
+
+Sửa modbus_service.c trước — thêm include logger + heartbeat log:Edited 3 filesEdited 3 filesFailed to edit modbus_service.cmodbus_service.cAdd logger include, TAG, and heartbeat interval constant for temp debug loggingmodbus_service.c+16-8Add heartbeat log inside modbus_task loop, throttled to ~1smodbus_service.c+21-10DoneGiờ thêm log READ/WRITE thật vào eMBRegHoldingCB trong user_mb_app.c:Edited 2 files, ran a commandEdited 2 files, ran a commandRecheck top of file for include block before editingScriptAdd logger include and TAG for temp debug logging in register callbacksuser_mb_app.c+6-3Add temp debug logging on holding register read/write to confirm real Modbus master trafficuser_mb_app.c+25-19DoneKiểm tra usb_rs485_is_enabled có được khai báo trong header không (để modbus_service.c gọi được):Confirm function declared in headerConfirm function declared in headerConfirm function declared in headerScriptDoneTốt, đã có sẵn trong header. Diff cuối cùng để bạn đối chiếu:Show full diff of both modified filesShow full diff of both modified filesShow full diff of both modified filesScriptDoneCó 1 lỗi tiềm ẩn: MODBUS_HEARTBEAT_EVERY_N_POLLS được define trước MODBUS_POLL_INTERVAL_MS (dòng 36, phía dưới). Cần sửa lại thứ tự để tránh macro chưa được define khi dùng.Check macro orderingCheck macro orderingCheck macro orderingScriptDoneĐúng, sẽ lỗi build (macro dùng trước khi define — với #define, macro object-like không mở rộng theo thứ tự nếu chưa khai báo). Cần sửa ngay.Edited a file, ran a commandEdited a file, ran a commandMove heartbeat macro definition after MODBUS_POLL_INTERVAL_MS to fix ordering bugmodbus_service.c+11-11Final review of corrected diffScriptDoneỔn. Đây là tóm tắt để bạn tự áp dụng thủ công lên máy Windows (hoặc git pull nếu bạn muốn tôi push — nhưng tôi không có quyền push, bạn cần tự áp dụng diff này).
+Tóm tắt thay đổi (2 file, đều trong synaptix/)
+1. synaptix/services/modbus/modbus_service.c
+
+Thêm #include "logger.h", TAG = "MODBUS".
+Thêm macro MODBUS_HEARTBEAT_EVERY_N_POLLS = 1000/20 = 50 lần poll (~1 giây).
+Trong modbus_task: đếm số vòng poll, cứ ~1 giây log 1 dòng:
+
+  modbus_task alive, bridge_enabled=0
+2. synaptix/app/user/modbus/user_mb_app.c
+
+Thêm #include "logger.h", TAG = "MB-REGS".
+Trong eMBRegHoldingCB: log mỗi lần có READ hoặc WRITE thật xảy ra:
+
+  Holding READ addr=0 nregs=10
+  Holding WRITE addr=5 nregs=2
+Việc bạn làm ngay bây giờ
+
+Build lại (build.bat), nạp firmware.
+Mở terminal debug qua LPUART1 (giống cách bạn xem log "waiting usb connected" trước đây).
+Boot lên → phải thấy dòng modbus_task alive, bridge_enabled=0 xuất hiện đều đặn mỗi giây. Nếu không thấy → task đã treo hoặc chưa được tạo, báo tôi ngay kèm log thật (đừng tự đoán nguyên nhân).
+Nếu thấy heartbeat đều → xác nhận chắc chắn Modbus stack đang sống, sẵn sàng nhận frame thật. Đây là điều kiện cần trước khi test thật với converter.
+
+Mai có converter, chỉ cần cắm vào bus RS485 (A-A, B-B, GND chung), chạy QModMaster/ModbusTools với cấu hình slave=1, 115200-8N1, đọc Holding Register 0–9 → nếu thấy dòng Holding READ addr=0 nregs=10 xuất hiện đúng lúc bấm Read trên PC, nghĩa là toàn bộ chuỗi hoạt động đúng.
+Log tạm này an toàn xoá sau khi verify xong — chỉ cần tìm comment TEMP DEBUG để gỡ."

@@ -25,6 +25,9 @@
 #include "task.h"
 #include "app_freertos.h"
 #include "usb_rs485.h"
+#include "logger.h"
+
+static const char *TAG = "SERVICE MODBUS";
 
 /* ── External symbols from portserial.c ──────────────────────────────────── */
 extern eModbus modbus[N_MODBUS];
@@ -34,6 +37,9 @@ extern void vMBPortSerialPoll(eModbus_t modbus);
 #define MODBUS_TASK_STACK_WORDS     1024
 #define MODBUS_TASK_PRIORITY        osPriorityNormal
 #define MODBUS_POLL_INTERVAL_MS     20
+
+/* TEMP DEBUG - remove after verification: ~1s heartbeat at 20ms/poll */
+#define MODBUS_HEARTBEAT_EVERY_N_POLLS  (1000 / MODBUS_POLL_INTERVAL_MS)
 
 /* ── Slave config (D1: hardcoded) ─────────────────────────────────────────── */
 #define MODBUS_SLAVE_ADDRESS        1
@@ -48,6 +54,12 @@ void modbus_task(void *arg)
         eMBPoll(&modbus[0]);
         vMBPortSerialPoll(&modbus[0]);
         user_mb_app_poll();
+        /* TEMP DEBUG - remove after verification */
+        poll_count++;
+        if (poll_count >= MODBUS_HEARTBEAT_EVERY_N_POLLS) {
+            poll_count = 0;
+            LOGI(TAG, "modbus_task alive, bridge_enabled=%d", (int)usb_rs485_is_enabled());
+        }
         vTaskDelay(pdMS_TO_TICKS(MODBUS_POLL_INTERVAL_MS));
     }
 }

@@ -10,6 +10,9 @@
  */
 
 #include "user_mb_app.h"
+#include "logger.h"
+
+static const char *TAG = "MB-REGS";
 
 #if (MB_ASCII_ENABLED > 0 || MB_RTU_ENABLED > 0 || MB_TCP_ENABLED > 0)
 
@@ -94,6 +97,8 @@ eMBErrorCode eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress,
         iRegIndex = usAddress - usSRegHoldStart;
         switch (eMode) {
         case MB_REG_READ:
+            /* TEMP DEBUG - remove after verification */
+            LOGI(TAG, "Holding READ addr=%u nregs=%u", (unsigned)usAddress, (unsigned)usNRegs);
             while (usNRegs > 0) {
                 *pucRegBuffer++ = (UCHAR)(usSRegHoldBuf[iRegIndex] >> 8);
                 *pucRegBuffer++ = (UCHAR)(usSRegHoldBuf[iRegIndex] & 0xFF);
@@ -102,6 +107,8 @@ eMBErrorCode eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress,
             }
             break;
         case MB_REG_WRITE:
+            /* TEMP DEBUG - remove after verification */
+            LOGI(TAG, "Holding WRITE addr=%u nregs=%u", (unsigned)usAddress, (unsigned)usNRegs);
             while (usNRegs > 0) {
                 usSRegHoldBuf[iRegIndex]  = (USHORT)(*pucRegBuffer++) << 8;
                 usSRegHoldBuf[iRegIndex] |= *pucRegBuffer++;
