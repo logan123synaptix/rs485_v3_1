@@ -82,7 +82,7 @@ extern "C" {
 
 // Use different configurations to test all net devices (also due to resource limitations)
 
-#define USE_ECM 1
+#define USE_ECM 0
 
 
 // MCU SRAM tier — drives the bigger lwIP buffers in lwipopts.h, the larger

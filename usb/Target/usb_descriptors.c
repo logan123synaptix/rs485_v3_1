@@ -92,7 +92,7 @@ static const tusb_desc_device_t desc_device = {
 
   .idVendor  = 0xCafe,
   .idProduct = USB_PID,
-  .bcdDevice = 0x0101,
+  .bcdDevice = 0x0103,
 
   .iManufacturer = STRID_MANUFACTURER,
   .iProduct      = STRID_PRODUCT,
