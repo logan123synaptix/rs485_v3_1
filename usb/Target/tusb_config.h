@@ -129,7 +129,7 @@ extern "C" {
 
 // Network class has 2 drivers: ECM/RNDIS and NCM.
 // Only one of the drivers can be enabled
-#define CFG_TUD_CDC           2
+#define CFG_TUD_CDC           1//2
 #define CFG_TUD_ECM_RNDIS     USE_ECM
 #define CFG_TUD_NCM           (1 - CFG_TUD_ECM_RNDIS)
 // Buffer sizes for the CDC channels
