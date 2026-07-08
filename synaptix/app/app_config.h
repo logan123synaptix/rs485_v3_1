@@ -49,7 +49,7 @@ extern "C" {
 
 /* USB CHANNEL  */
 #define BSP_USB_SHELL_CH        0
-#define BSP_USB_BRIDGE_CH       0
+#define BSP_USB_BRIDGE_CH       1
 
 #ifdef __cplusplus
 }
