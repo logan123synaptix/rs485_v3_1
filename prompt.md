@@ -170,3 +170,69 @@ gọi ở đâu — cần tìm hiểu thiết kế trước khi tích hợp).
   build.bat (STM32CubeCLT + Ninja).
 - Việc phụ, chưa ưu tiên: đặt tên hiển thị COM port đẹp hơn "USB Serial Device" (cần 
   file .inf custom, có yêu cầu ký driver) — chỉ làm nếu người dùng chủ động hỏi lại.
+
+[TIẾP THEO SAU BẢN PROMPT TRƯỚC — cập nhật tiến độ mới nhất]
+
+ĐàHOÀN THÀNH THÊM (sau bản bàn giao trước):
+- Sửa lỗi treo hệ thống: `bsp_uart_available(BSP_RS485)` gọi `uxQueueMessagesWaiting()` 
+  trên `rx_queue = NULL` vì `bsp_uart_init(BSP_RS485)` chưa từng được gọi (chỉ có trong 
+  modbus_service_init(), vốn chưa được gọi ở app.c lúc đó). Người dùng đã tự thêm 
+  `modbus_service_init()` vào synaptix/app/app.c (dòng ~38, trước usb_rs485_init()) 
+  để giải quyết — điều này khiến bsp_uart_init(BSP_RS485) được gọi đúng, hết crash.
+- Sửa lỗi log hiển thị ký tự rác: dòng LOGI dùng "%s" với buffer không có null-terminator 
+  đảm bảo (uint8_t buf[256], chỉ nhận đúng `len` byte thật) → đổi "%s" thành "%.*s" với 
+  (int)len làm precision, ở cả 2 dòng log USB->RS485 và RS485->USB trong bridge_task 
+  (usb_rs485.c). Dòng RS485->USB trước đó còn thiếu tham số TAG trong macro LOGI(TAG,...) 
+  — đã sửa bổ sung.
+- Log hiện tại xác nhận: bridge_task nhận đúng dữ liệu từ USB (COM Bridge), forward ra 
+  bsp_uart_transmit(BSP_RS485,...) — log in đúng nội dung gửi (ví dụ "AT+ROLE?", 
+  "AT+STATE?"), không còn ký tự rác.
+
+VẤN ĐỀ VỪA PHÁT HIỆN, ĐANG XỬ LÝ (làm ngay khi nhận bàn giao):
+Khi người dùng thêm modbus_service_init() vào app.c, đồng thời usb_rs485.c vẫn đang 
+hard-code `s_enabled = true` (từ bước test trước) — nghĩa là CẢ modbus_task VÀ 
+bridge_task ĐANG CHẠY SONG SONG THẬT SỰ, tranh chấp cùng 1 UART vật lý (USART1/RS485) 
+và cùng 1 chân DE, KHÔNG có cơ chế suspend/resume nào được kích hoạt (vì 
+usb_rs485_enable() — nơi gọi vTaskSuspend(modbus) — chỉ được gọi khi đi qua đường 
+enable() thật sự, nhưng code đang bypass thẳng bằng s_enabled=true tĩnh, không qua 
+hàm này). Đây LÀ VẤN ĐỀ CẦN SỬA TRƯỚC KHI TEST MODBUS, nếu không dữ liệu Modbus và 
+Bridge sẽ lẫn lộn/hỏng khó lường trên bus RS485.
+
+GIẢI PHÁP ĐÃ THỐNG NHẤT VỚI NGƯỜI DÙNG (cần xác nhận đã áp dụng đúng khi nhận bàn giao 
+— tự clone kiểm tra, KHÔNG giả định đã làm đúng):
+1. Trả `s_enabled` về `false` trong usb_rs485.c (bỏ hard-code true).
+2. Thêm 2 shell command mới trong synaptix/app/user/shell/shell_commands.c:
+   - `bridge_on` → gọi usb_rs485_enable() (tự động suspend Modbus qua 
+     vTaskSuspend(s_modbus_task_handle) đã có sẵn trong hàm này)
+   - `bridge_off` → gọi usb_rs485_disable() (tự động resume Modbus)
+   Cần thêm #include "usb_rs485.h" vào đầu shell_commands.c.
+3. Quy trình test dự kiến sau khi sửa: boot mặc định Modbus chạy nền, Bridge đứng yên 
+   (an toàn). Gõ `bridge_on` trên shell (qua COM Shell) để kích hoạt bridge test, gõ 
+   `bridge_off` để trả lại cho Modbus.
+
+BƯỚC TIẾP THEO CẦN LÀM (theo đúng thứ tự, sau khi xác nhận bridge_on/off hoạt động 
+đúng, không còn xung đột):
+1. Verify: mở COM Shell, gõ `help` — phải thấy 6 lệnh (help, reboot, get_io, set_do, 
+   bridge_on, bridge_off). Gõ `bridge_on` → mở COM Bridge test gửi/nhận dữ liệu như đã 
+   làm — log không được có dấu hiệu lẫn dữ liệu Modbus (ví dụ không thấy log liên quan 
+   modbus_task can thiệp UART cùng lúc).
+2. Test Modbus riêng: gõ `bridge_off` trên Shell để đảm bảo Modbus đang chạy độc quyền 
+   UART, rồi dùng phần mềm Modbus Poll/Master giả lập (hoặc công cụ tương đương) kết 
+   nối tới cổng RS485 vật lý (không phải qua USB — vì Modbus đọc trực tiếp UART, không 
+   đi qua USB CDC nào cả) để test đọc/ghi thanh ghi. Cấu hình Modbus theo comment trong 
+   modbus_service.c: RTU, slave address=1, baud=115200, 8N1. Cần hỏi người dùng có 
+   RS485-to-USB converter rời (không phải board này) để làm Modbus master test hay 
+   không — nếu không có, cần bàn cách test khác (loopback không khả thi cho Modbus vì 
+   cần đúng giao thức request/response, không đơn thuần echo).
+3. Sau khi cả bridge và modbus riêng lẻ đều pass, mới tính đến việc test "chuyển đổi 
+   qua lại" nhiều lần (bridge_on → test → bridge_off → test modbus → bridge_on lại...) 
+   để đảm bảo transition không để lại state rác (buffer cũ, queue chưa flush, v.v.) — 
+   đặc biệt chú ý xem có cần gọi bsp_uart_flush(BSP_RS485) khi enable/disable để xóa 
+   queue rác từ chế độ trước hay không (function bsp_uart_flush đã có sẵn trong 
+   Board/board.c, hiện chưa được gọi ở đâu trong usb_rs485_enable/disable — CÂN NHẮC 
+   thêm vào để tránh dữ liệu cũ lẫn giữa 2 chế độ khi chuyển đổi).
+
+LƯU Ý: code hiện tại KHÔNG xử lý trường hợp bridge_on được gọi khi modbus_task 
+handle == NULL (nếu vì lý do nào đó modbus_service_init() thất bại hoặc bị bỏ qua) — 
+usb_rs485_enable() có check `if (s_modbus_task_handle != NULL)` nên an toàn (không 
+crash), nhưng cần lưu ý khi debug nếu suspend không xảy ra như mong đợi.

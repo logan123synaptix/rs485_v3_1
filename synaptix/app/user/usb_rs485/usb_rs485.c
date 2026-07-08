@@ -18,7 +18,7 @@
 /*  Internal state  */
 static TaskHandle_t s_bridge_task_handle = NULL;
 static TaskHandle_t s_modbus_task_handle = NULL;
-static volatile bool s_enabled = true;
+static volatile bool s_enabled = false;
 
 static const char *TAG = "USB-RS485";
 
@@ -132,4 +132,27 @@ void usb_rs485_disable(void)
 
 bool usb_rs485_is_enabled(void){
     return s_enabled;
+}
+
+/* TinyUSB callback: fires whenever host sets/clears DTR (or RTS) on any CDC ACM.
+ * We only react to the Bridge instance — opening a terminal on the Bridge COM
+ * port auto-enables the bridge (and suspends Modbus); closing it auto-disables
+ * (and resumes Modbus). Shell instance DTR changes are ignored here — shell_app.c
+ * already handles its own connection detection independently.
+ * Manual override is still available via shell commands bridge_on/bridge_off —
+ * both paths call the same usb_rs485_enable()/disable(), which are idempotent
+ * (guarded by the s_enabled check), so no conflict between the two triggers. */
+void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
+{
+    (void)rts;
+
+    if (itf != BSP_USB_BRIDGE_CH) {
+        return;
+    }
+
+    if (dtr) {
+        usb_rs485_enable();
+    } else {
+        usb_rs485_disable();
+    }
 }

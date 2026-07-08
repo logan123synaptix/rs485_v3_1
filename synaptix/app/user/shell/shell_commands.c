@@ -14,7 +14,7 @@
 #include "bsp_board_gpio.h"
 #include "FreeRTOS.h"
 #include "task.h"
-
+#include "usb_rs485.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -59,11 +59,37 @@ static int cmd_set_do(ShellContext_t *shell, int argc, char *argv[])
 /* ── Command table ────────────────────────────────────────────────────────── */
 
 static const Cli_Shell_Cmd s_shell_commands[] = {
-    { "help",   cli_shell_help_handler, "List all commands"           },
-    { "reboot", cmd_reboot,             "Reboot the device"           },
-    { "get_io", cmd_get_io,             "Read DI1-DI4 states"         },
-    { "set_do", cmd_set_do,             "set_do <ch 1-4> <val 0|1>"   },
+    { "help",          cli_shell_help_handler, "List all commands"                          },
+    { "reboot",        cmd_reboot,             "Reboot the device"                          },
+    { "get_io",        cmd_get_io,             "Read DI1-DI4 states"                        },
+    { "set_do",        cmd_set_do,             "set_do <ch 1-4> <val 0|1>"                  },
+    { "bridge_on",     cmd_bridge_on,          "Manually enable USB-RS485 bridge"           },
+    { "bridge_off",    cmd_bridge_off,         "Manually disable USB-RS485 bridge"          },
+    { "bridge_status", cmd_bridge_status,      "Show current bridge on/off state"           },
 };
+
+static int cmd_bridge_on(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc; (void)argv;
+    usb_rs485_enable();
+    cli_shell_put_line(shell, "USB-RS485 bridge ENABLED (Modbus suspended)");
+    return 0;
+}
+
+static int cmd_bridge_off(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc; (void)argv;
+    usb_rs485_disable();
+    cli_shell_put_line(shell, "USB-RS485 bridge DISABLED (Modbus resumed)");
+    return 0;
+}
+
+static int cmd_bridge_status(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc; (void)argv;
+    cli_shell_printf(shell, "Bridge: %s", usb_rs485_is_enabled() ? "ENABLED" : "DISABLED");
+    return 0;
+}
 
 /* Exported symbols required by cli_shell */
 const Cli_Shell_Cmd *const g_shell_commands    = s_shell_commands;

@@ -21,6 +21,8 @@ bool usb_rs485_is_enabled(void);
 
 void usb_rs485_set_modbus_handle(TaskHandle_t handle);
 
+void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts);
+
 #ifdef __cplusplus
 }
 #endif
