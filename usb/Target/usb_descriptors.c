@@ -142,6 +142,9 @@ static uint8_t const rndis_fs_configuration[] = {
   // ACM Port full speed macro block
   TUD_CDC_DESCRIPTOR(
       ITF_NUM_CDC_ACM, STRID_CDC_ACM, EPNUM_ACM_NOTIF, 8, EPNUM_ACM_OUT, EPNUM_ACM_IN, 64),
+
+  TUD_CDC_DESCRIPTOR(
+      ITF_NUM_CDC_ACM2, STRID_CDC_ACM2, EPNUM_ACM2_NOTIF, 8, EPNUM_ACM2_OUT, EPNUM_ACM2_IN, 64),
 };
 
 static const uint8_t ecm_fs_configuration[] = {
@@ -156,6 +159,9 @@ static const uint8_t ecm_fs_configuration[] = {
   // ACM Port full speed macro block
   TUD_CDC_DESCRIPTOR(
       ITF_NUM_CDC_ACM, STRID_CDC_ACM, EPNUM_ACM_NOTIF, 8, EPNUM_ACM_OUT, EPNUM_ACM_IN, 64),
+
+  TUD_CDC_DESCRIPTOR(
+      ITF_NUM_CDC_ACM2, STRID_CDC_ACM2, EPNUM_ACM2_NOTIF, 8, EPNUM_ACM2_OUT, EPNUM_ACM2_IN, 64),
 };
 
 #if TUD_OPT_HIGH_SPEED
@@ -173,6 +179,9 @@ static uint8_t const rndis_hs_configuration[] = {
   // ACM Port high speed macro block
   TUD_CDC_DESCRIPTOR(
       ITF_NUM_CDC_ACM, STRID_CDC_ACM, EPNUM_ACM_NOTIF, 8, EPNUM_ACM_OUT, EPNUM_ACM_IN, 512),
+
+  TUD_CDC_DESCRIPTOR(
+      ITF_NUM_CDC_ACM2, STRID_CDC_ACM2, EPNUM_ACM2_NOTIF, 8, EPNUM_ACM2_OUT, EPNUM_ACM2_IN, 512),
 };
 
 static const uint8_t ecm_hs_configuration[] = {
@@ -187,6 +196,9 @@ static const uint8_t ecm_hs_configuration[] = {
   // ACM Port high speed macro block
   TUD_CDC_DESCRIPTOR(
       ITF_NUM_CDC_ACM, STRID_CDC_ACM, EPNUM_ACM_NOTIF, 8, EPNUM_ACM_OUT, EPNUM_ACM_IN, 512),
+
+  TUD_CDC_DESCRIPTOR(
+      ITF_NUM_CDC_ACM2, STRID_CDC_ACM2, EPNUM_ACM2_NOTIF, 8, EPNUM_ACM2_OUT, EPNUM_ACM2_IN, 512),
 };
 #endif // highspeed
 
@@ -204,6 +216,9 @@ static uint8_t const ncm_fs_configuration[] = {
   // ACM Port full speed macro block
   TUD_CDC_DESCRIPTOR(
       ITF_NUM_CDC_ACM, STRID_CDC_ACM, EPNUM_ACM_NOTIF, 8, EPNUM_ACM_OUT, EPNUM_ACM_IN, 64),
+
+  TUD_CDC_DESCRIPTOR(
+      ITF_NUM_CDC_ACM2, STRID_CDC_ACM2, EPNUM_ACM2_NOTIF, 8, EPNUM_ACM2_OUT, EPNUM_ACM2_IN, 64),
 };
 
 #if TUD_OPT_HIGH_SPEED
@@ -222,6 +237,9 @@ static uint8_t const ncm_hs_configuration[] = {
   // ACM Port high speed macro block
   TUD_CDC_DESCRIPTOR(
       ITF_NUM_CDC_ACM, STRID_CDC_ACM, EPNUM_ACM_NOTIF, 8, EPNUM_ACM_OUT, EPNUM_ACM_IN, 512),
+
+  TUD_CDC_DESCRIPTOR(
+      ITF_NUM_CDC_ACM2, STRID_CDC_ACM2, EPNUM_ACM2_NOTIF, 8, EPNUM_ACM2_OUT, EPNUM_ACM2_IN, 512),
 };
 #endif // highspeed
 
