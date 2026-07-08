@@ -46,6 +46,7 @@ enum {
   STRID_INTERFACE,
   STRID_MAC,
   STRID_CDC_ACM,      // Added for ACM Port Name
+  STRID_CDC_ACM2,     // Added for RS485-USB
   STRID_COUNT
 };
 
@@ -54,6 +55,8 @@ enum {
   ITF_NUM_CDC_DATA,     // Network Data Interface
   ITF_NUM_CDC_ACM,      // ACM Control Interface
   ITF_NUM_CDC_ACM_DATA, // ACM Data Interface
+  ITF_NUM_CDC_ACM2,
+  ITF_NUM_CDC_ACM2_DATA,
   ITF_NUM_TOTAL
 };
 
@@ -89,7 +92,7 @@ static const tusb_desc_device_t desc_device = {
 
   .idVendor  = 0xCafe,
   .idProduct = USB_PID,
-  .bcdDevice = 0x0102,//0x0101,
+  .bcdDevice = 0x0101,
 
   .iManufacturer = STRID_MANUFACTURER,
   .iProduct      = STRID_PRODUCT,
@@ -107,9 +110,9 @@ const uint8_t *tud_descriptor_device_cb(void) {
 //--------------------------------------------------------------------+
 // Configuration Descriptor
 //--------------------------------------------------------------------+
-#define MAIN_CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_RNDIS_DESC_LEN + TUD_CDC_DESC_LEN)
-#define ALT_CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_ECM_DESC_LEN + TUD_CDC_DESC_LEN)
-#define NCM_CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_NCM_DESC_LEN + TUD_CDC_DESC_LEN)
+#define MAIN_CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_RNDIS_DESC_LEN + TUD_CDC_DESC_LEN + TUD_CDC_DESC_LEN)
+#define ALT_CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_ECM_DESC_LEN + TUD_CDC_DESC_LEN + TUD_CDC_DESC_LEN)
+#define NCM_CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_NCM_DESC_LEN + TUD_CDC_DESC_LEN + TUD_CDC_DESC_LEN)
 
 // Safe Explicit Endpoint Routing for STM32H5 Shared-Direction Architecture
 #define EPNUM_NET_NOTIF 0x81
@@ -119,6 +122,11 @@ const uint8_t *tud_descriptor_device_cb(void) {
 #define EPNUM_ACM_NOTIF 0x83
 #define EPNUM_ACM_OUT   0x04
 #define EPNUM_ACM_IN    0x84
+
+// Second CDC ACM (RS485 bridge) - new endpoint numbers, must not collide with above
+#define EPNUM_ACM2_NOTIF 0x85
+#define EPNUM_ACM2_OUT   0x06
+#define EPNUM_ACM2_IN    0x86
 
 #if CFG_TUD_ECM_RNDIS
 
@@ -396,7 +404,8 @@ static const char *string_desc_arr[STRID_COUNT] = {
   [STRID_SERIAL]       = NULL,                         // Serials will use unique ID if possible
   [STRID_INTERFACE]    = "Synaptix Network Interface", // Interface Description
   [STRID_MAC]          = NULL,                         // STRID_MAC index is handled separately
-  [STRID_CDC_ACM]      = "Synaptix COM Port"           // Description for Virtual COM interface
+  [STRID_CDC_ACM]      = "Synaptix COM Port",           // Description for Virtual COM interface
+  [STRID_CDC_ACM2]     = "Synaptix RS485 Bridge Port"
 };
 
 static uint32_t cached_uid[3];
