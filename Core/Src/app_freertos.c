@@ -160,9 +160,9 @@ void StartDefaultTask(void *argument)
     uint32_t hb = 0;
     for(;;)
     {
-      if ((hb++ % 500) == 0) {
-        LOGI("default", "heartbeat=%lu tick=%lu", (unsigned long)hb, (unsigned long)xTaskGetTickCount());
-      }
+      // if ((hb++ % 500) == 0) {
+      //   LOGI("default", "heartbeat=%lu tick=%lu", (unsigned long)hb, (unsigned long)xTaskGetTickCount());
+      // }
       osDelay(1);
     }
   }
