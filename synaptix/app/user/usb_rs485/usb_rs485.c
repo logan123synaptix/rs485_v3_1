@@ -7,6 +7,7 @@
 
 #include "board.h"
 #include "logger.h"
+#include "tusb.h"
 
 /*  Config  */
 #define BRIDGE_TASK_STACK_WORDS     512
@@ -32,6 +33,12 @@ static void bridge_task(void *arg)
     LOGI(TAG, "bridge_task ENTERED, tick=%lu", (unsigned long)xTaskGetTickCount());
 
     for (;;) {
+        /* Wait until TinyUSB stack is mounted before touching any tud_cdc_n_* API */
+        if (!tud_mounted()) {
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
+
         /* Block here when disabled */
         if (!s_enabled) {
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
