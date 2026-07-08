@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "indicator.h"
 #include "shell_app.h"
+#include "modbus_service.h"
 
 static const char *TAG = "APP";
 

@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* ── Command handlers ─────────────────────────────────────────────────────── */
+/* Command handlers  */
 
 static int cmd_reboot(ShellContext_t *shell, int argc, char *argv[])
 {
@@ -56,18 +56,6 @@ static int cmd_set_do(ShellContext_t *shell, int argc, char *argv[])
     return 0;
 }
 
-/* ── Command table ────────────────────────────────────────────────────────── */
-
-static const Cli_Shell_Cmd s_shell_commands[] = {
-    { "help",          cli_shell_help_handler, "List all commands"                          },
-    { "reboot",        cmd_reboot,             "Reboot the device"                          },
-    { "get_io",        cmd_get_io,             "Read DI1-DI4 states"                        },
-    { "set_do",        cmd_set_do,             "set_do <ch 1-4> <val 0|1>"                  },
-    { "bridge_on",     cmd_bridge_on,          "Manually enable USB-RS485 bridge"           },
-    { "bridge_off",    cmd_bridge_off,         "Manually disable USB-RS485 bridge"          },
-    { "bridge_status", cmd_bridge_status,      "Show current bridge on/off state"           },
-};
-
 static int cmd_bridge_on(ShellContext_t *shell, int argc, char *argv[])
 {
     (void)argc; (void)argv;
@@ -90,6 +78,19 @@ static int cmd_bridge_status(ShellContext_t *shell, int argc, char *argv[])
     cli_shell_printf(shell, "Bridge: %s", usb_rs485_is_enabled() ? "ENABLED" : "DISABLED");
     return 0;
 }
+
+/* Command table */
+
+static const Cli_Shell_Cmd s_shell_commands[] = {
+    { "help",          cli_shell_help_handler, "List all commands"                          },
+    { "reboot",        cmd_reboot,             "Reboot the device"                          },
+    { "get_io",        cmd_get_io,             "Read DI1-DI4 states"                        },
+    { "set_do",        cmd_set_do,             "set_do <ch 1-4> <val 0|1>"                  },
+    { "bridge_on",     cmd_bridge_on,          "Manually enable USB-RS485 bridge"           },
+    { "bridge_off",    cmd_bridge_off,         "Manually disable USB-RS485 bridge"          },
+    { "bridge_status", cmd_bridge_status,      "Show current bridge on/off state"           },
+};
+
 
 /* Exported symbols required by cli_shell */
 const Cli_Shell_Cmd *const g_shell_commands    = s_shell_commands;
