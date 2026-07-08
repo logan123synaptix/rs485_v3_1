@@ -423,7 +423,7 @@ static const char *string_desc_arr[STRID_COUNT] = {
   [STRID_INTERFACE]    = "Synaptix Network Interface", // Interface Description
   [STRID_MAC]          = NULL,                         // STRID_MAC index is handled separately
   [STRID_CDC_ACM]      = "Synaptix COM Port",           // Description for Virtual COM interface
-  [STRID_CDC_ACM2]     = "Synaptix RS485 Bridge Port"
+  // [STRID_CDC_ACM2]     = "Synaptix RS485 Bridge Port"
 };
 
 static uint32_t cached_uid[3];
