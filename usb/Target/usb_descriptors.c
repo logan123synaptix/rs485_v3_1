@@ -351,7 +351,7 @@ const uint8_t *tud_descriptor_configuration_cb(uint8_t index) {
 
 const uint8_t desc_bos[] = {
   TUD_BOS_DESCRIPTOR(BOS_TOTAL_LEN, 1),
-  TUD_BOS_MICROSOFT_OS_20_DESCRIPTOR(MS_OS_20_DESC_LEN, 1)};
+  TUD_BOS_MS_OS_20_DESCRIPTOR(MS_OS_20_DESC_LEN, 1)};
 
 const uint8_t *tud_descriptor_bos_cb(void) {
   return desc_bos;
